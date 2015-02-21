@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>SVG Clock</title>
+    <style>
+      * {
+        padding: 0px;
+        margin: 0px;
+        -webkit-user-select : none;
+        -moz-user-select : none;
+        user-select : none;
+      }
+
+      html, body, #clock {
+        height: 100%;
+        width: 100%;
+      }
+
+      #clock {
+        display: -webkit-box;
+        display: -moz-box;
+        display: box;
+
+        -webkit-box-align: center;
+        -moz-box-align: center;
+        box-align: center;
+
+        -webkit-box-pack: center;
+        -moz-box-pack: center;
+        box-pack: center;
+      }/**/
+    </style>
+    <script type="text/javascript" src="raphael-min.js"></script>
+    <script type="text/javascript">
+      function draw_clock() {
+        side = 200;
+        var canvas = Raphael("clock", side, side);
+        with (document.querySelector("#clock > svg")) {
+          setAttribute("viewBox", "0 0 200 200");
+          setAttribute("width",  "600");
+          setAttribute("height", "600");
+        }
+        var clock = canvas.circle(side/2, side/2, side/2-5);
+        var hour_numbers = ["XII",  "I", "II", "III",
+                             "IV",  "V", "VI", "VII",
+                           "VIII", "IX",  "X", "XI"];
+        var hand_styles = { hour:{ "stroke":"#333", "stroke-width": 2},
+                            min:{  "stroke":"#666", "stroke-width": 1},
+                            sec:{  "stroke":"#999", "stroke-width": 0.5}};
+        clock.attr({"fill":"#fdfdfd", "stroke":"#333", "stroke-width":2});
+        for (var i = 0; i < 60; i++) {
+          var d = (i % 15 == 0) ? 10 : (i % 5 == 0) ? 5 : 0;
+          var sx = side/2 + Math.sin(Math.PI/30 * i) * side/4;
+          var sy = side/2 - Math.cos(Math.PI/30 * i) * side/4;
+          var ex = side/2 + Math.sin(Math.PI/30 * i) * (side/4-d-5);
+          var ey = side/2 - Math.cos(Math.PI/30 * i) * (side/4-d-5);
+          var hour_sign = canvas.path("M"+sx+" "+sy+"L"+ex+" "+ey);
+          var style = (i % 15 == 0) ? hand_styles.hour :
+                      (i % 5 == 0)  ? hand_styles.min  : hand_styles.sec;
+          hour_sign.attr(style);
+
+          if (i % 5 == 0) {
+              var x = side/2 + Math.sin(Math.PI/30 * i) * side/2 * 3/4;
+              var y = side/2 - Math.cos(Math.PI/30 * i) * side/2 * 3/4;
+              var ht = canvas.text(x, y, hour_numbers[i/5]);
+              ht.rotate(i * 6, x, y);
+              ht.attr({"font-family":"Tahoma", fill:"#333"});
+          }
+        }
+
+        var m = "M" + side/2 + " " + side/2;
+        var l = "L" + side/2 + " ";
+        hour_hand = canvas.path(m+l+side/2*0.60);
+        hour_hand.attr({"stroke": "#333", "stroke-width":2});
+        min_hand = canvas.path(m+l+side/2*0.45);
+        min_hand.attr({"stroke":  "#333", "stroke-width":1});
+        sec_hand = canvas.path(m+l+side/2*0.25);
+        sec_hand.attr({"stroke":  "#333", "stroke-width":0.5});
+        var pin = canvas.circle(side/2, side/2, 3);
+        pin.attr({stroke:"#333", fill:"#333"});
+        update_clock();
+        setInterval("update_clock()", 1000);
+      }
+
+      function update_clock() {
+        var now = new Date();
+        var hours = now.getHours();
+        var minutes = now.getMinutes();
+        var seconds = now.getSeconds();
+        hour_hand.rotate(30 * hours + minutes/2.0, side/2, side/2);
+        min_hand.rotate(6 * minutes, side/2, side/2);
+        sec_hand.rotate(6 * seconds, side/2, side/2);
+      }
+    </script>
+  </head>
+  <body>
+    <div id="clock"></div>
+    <script>draw_clock()</script>
+  </body>
+</html>
